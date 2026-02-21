@@ -87,30 +87,29 @@ describe('signXml – password mismatch', () => {
     expect(result).not.toContain('mock-signed');
   });
 
-  it('should fallback to mock signature with wrong password', async () => {
+  it('should throw error with wrong password', async () => {
     const signXml = await getSignXml();
     const xml = '<NFS-e><test/></NFS-e>';
     const encrypted = encryptPassword(WRONG_PASSWORD);
 
-    const result = await signXml(xml, {
-      filename: PFX_FILENAME,
-      encryptedPassword: encrypted,
-    });
-
-    expect(result).toContain('mock-signed');
-    expect(result).not.toContain('signed by');
+    await expect(
+      signXml(xml, {
+        filename: PFX_FILENAME,
+        encryptedPassword: encrypted,
+      }),
+    ).rejects.toThrow('Certificate signing failed');
   });
 
-  it('should fallback to mock when PFX file does not exist', async () => {
+  it('should throw error when PFX file does not exist', async () => {
     const signXml = await getSignXml();
     const xml = '<NFS-e><test/></NFS-e>';
     const encrypted = encryptPassword('qualquer');
 
-    const result = await signXml(xml, {
-      filename: 'nao-existe.pfx',
-      encryptedPassword: encrypted,
-    });
-
-    expect(result).toContain('mock-signed');
+    await expect(
+      signXml(xml, {
+        filename: 'nao-existe.pfx',
+        encryptedPassword: encrypted,
+      }),
+    ).rejects.toThrow('Certificate signing failed');
   });
 });

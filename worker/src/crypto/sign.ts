@@ -54,7 +54,6 @@ export async function signXml(
     return `${xml}\n<!-- signed by ${subjectCN}, sha256:${hash} -->`;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Signing failed';
-    console.warn(`Certificate signing failed (${message}), using mock signature`);
-    return `${xml}\n<!-- mock-signed -->`;
+    throw new Error(`Certificate signing failed: ${message}`);
   }
 }
