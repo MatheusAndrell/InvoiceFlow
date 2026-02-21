@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   db:
     image: postgres:16-alpine
@@ -90,7 +88,7 @@ services:
       REDIS_PORT: 6379
       ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
       PREFEITURA_URL: http://prefeitura-mock:3001
-      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://n8n:5678/webhook/invoiceflow-webhook}
       UPLOADS_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads
@@ -117,10 +115,26 @@ services:
     networks:
       - invoiceflow
 
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_PROTOCOL=http
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_WEBHOOK_URL=http://n8n:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - invoiceflow
+
 volumes:
   postgres_data:
   redis_data:
   uploads:
+  n8n_data:
 
 networks:
   invoiceflow:
