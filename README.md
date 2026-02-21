@@ -1,14 +1,17 @@
-# InvoiceFlow - Emissor de NFS-e Simplificado
 
-Aplicação full stack containerizada para simular emissão de NFS-e com processamento assíncrono, prefeitura mock e webhook.
+# InvoiceFlow – Emissor de NFS-e Simplificado
 
-## Stack
+**InvoiceFlow** é uma solução full stack robusta e containerizada para emissão simulada de NFS-e, com arquitetura moderna, processamento assíncrono, integração via webhook e ambiente de demonstração em produção. O projeto foi desenvolvido com foco em confiabilidade, segurança, escalabilidade e práticas maduras de engenharia de software.
 
-- Backend: Node.js + TypeScript + Express + Prisma
-- Frontend: React + Vite
-- Banco: PostgreSQL
-- Fila: Redis + BullMQ
-- Infra: Docker + Docker Compose
+
+## Stack Tecnológica
+
+- **Backend:** Node.js + TypeScript + Express + Prisma
+- **Frontend:** React + Vite
+- **Banco de Dados:** PostgreSQL
+- **Fila:** Redis + BullMQ
+- **Infraestrutura:** Docker + Docker Compose
+
 
 ## Serviços Docker
 
@@ -19,7 +22,34 @@ Aplicação full stack containerizada para simular emissão de NFS-e com process
 - `redis`
 - `frontend` (porta `8080`)
 
-## Como rodar
+
+---
+
+## Demonstração Online
+
+A aplicação está disponível publicamente para avaliação:
+
+- **Frontend:** http://35.185.50.100:8080/
+- **API Health Check:** http://35.185.50.100:3000/health
+- **N8N 
+
+> Ambiente hospedado em VM na GCP utilizando Docker Compose.
+> O Nginx atua como reverse proxy e único ponto de entrada público.
+> Esta instância é destinada exclusivamente para demonstração técnica.
+---
+
+## Workflow Automation (N8n)
+
+O ambiente inclui um serviço N8n para demonstrar consumo automatizado do webhook de emissão.
+
+O workflow pode ser importado a partir de:
+`n8n/workflow-webhook.json`
+
+> No ambiente Docker local o N8n sobe automaticamente na porta 5678.
+> Em produção real, esse serviço não seria exposto publicamente.
+---
+
+## Como rodar localmente
 
 1. Copie as variáveis de ambiente:
 
@@ -44,7 +74,8 @@ docker compose ps
 - Frontend: `http://localhost:8080`
 - API health: `http://localhost:3000/health`
 
-## Variáveis de ambiente
+
+## Variáveis de Ambiente
 
 Veja o arquivo `.env.example`.
 
@@ -56,12 +87,38 @@ Principais variáveis:
 - `PREFEITURA_SUCCESS_RATE`
 - `WEBHOOK_URL` (opcional)
 
-## Usuário de demonstração (seed)
+
+
+## Usuário de Demonstração (Seed)
 
 - Email: `admin@demo.com`
 - Senha: `admin`
 
-## Endpoints principais (API)
+
+## Certificado de Teste (.pfx)
+
+**Importante:** Não commite nenhum arquivo de certificado (.pfx/.p12) no repositório. Para testar o upload de certificado, gere um arquivo de teste localmente usando OpenSSL:
+
+### Como gerar um certificado .pfx de teste
+
+1. Gere uma chave privada e um certificado autoassinado:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout test-key.pem -out test-cert.pem -days 365 -nodes -subj "/CN=Teste NFS-e"
+```
+
+2. Converta para .pfx:
+
+```bash
+openssl pkcs12 -export -out test-cert.pfx -inkey test-key.pem -in test-cert.pem -password pass:123456
+```
+
+O arquivo `test-cert.pfx` será gerado com a senha `123456`. Use esse arquivo para testar o upload no sistema.
+
+> Não utilize certificados reais. O arquivo gerado é apenas para fins de teste.
+
+
+## Endpoints Principais (API)
 
 ### Auth
 
@@ -96,7 +153,8 @@ Payload do `POST /sales`:
 }
 ```
 
-## Fluxo funcional
+
+## Fluxo Funcional
 
 1. Usuário faz login e recebe JWT.
 2. Usuário envia certificado `.pfx/.p12` com senha.
@@ -106,7 +164,8 @@ Payload do `POST /sales`:
 6. Status da sale muda para `SUCCESS`/`ERROR`.
 7. Em caso de sucesso, worker dispara webhook (`WEBHOOK_URL`).
 
-## Atualizações em tempo real (SSE)
+
+## Atualizações em Tempo Real (SSE)
 
 O frontend recebe atualizações de status das vendas em tempo real via **Server-Sent Events**, sem necessidade de recarregar a página.
 
@@ -114,6 +173,7 @@ O frontend recebe atualizações de status das vendas em tempo real via **Server
 - **Worker** publica atualizações via Redis Pub/Sub (`sale:updates:{userId}`).
 - **Frontend** conecta automaticamente ao SSE após login; a tabela de vendas atualiza sozinha.
 - **Nginx** está configurado com `proxy_buffering off` e `proxy_read_timeout 86400s` para manter a conexão SSE aberta.
+
 
 ## Componentização (Atomic Design)
 
@@ -132,7 +192,9 @@ As 3 páginas (`LoginPage`, `DashboardPage`, `CertificatePage`) consomem apenas 
 
 ---
 
-## Diferenciais implementados
+
+## Diferenciais Implementados
+
 
 ### 1. Retries / Backoff e Idempotência
 
@@ -162,7 +224,8 @@ docker compose logs worker --tail 20
 docker compose start prefeitura-mock
 ```
 
-### 2. Testes unitários do emissor (Worker)
+
+### 2. Testes Unitários do Emissor (Worker)
 
 Framework: **Vitest 1.6**. 5 suítes de teste com 20 testes cobrindo todo o pipeline de emissão.
 
@@ -190,7 +253,8 @@ npx vitest run tests/sign.test.ts
 npx vitest run tests/sale.processor.test.ts
 ```
 
-### 3. CI simples (GitHub Actions)
+
+### 3. CI Automatizado (GitHub Actions)
 
 Pipeline em `.github/workflows/ci.yml` acionado em push para `main`/`develop` e pull requests para `main`.
 
@@ -216,7 +280,8 @@ cd worker && npm run lint
 cd frontend && npm run lint
 ```
 
-### 4. Reverse Proxy Nginx (hardened)
+
+### 4. Reverse Proxy Nginx (Hardened)
 
 O Nginx em `frontend/nginx.conf` vai além de um proxy simples:
 
@@ -249,7 +314,8 @@ $r.Headers["X-Content-Type-Options"]   # nosniff
 $r.Headers["Content-Security-Policy"]  # default-src 'self' ...
 ```
 
-### 5. Workflow N8n (export)
+
+### 5. Workflow N8n (Export)
 
 Arquivo: `n8n/workflow-webhook.json` — workflow importável no N8n para consumir o webhook de emissão.
 
@@ -287,47 +353,47 @@ O N8n já sobe junto com os demais serviços via Docker Compose (porta `5678`). 
 
 ---
 
-## Decisões de arquitetura e trade-offs
 
-- Assinatura digital simplificada: o worker usa o certificado para extrair dados e gerar uma assinatura mock baseada em hash no XML. Não implementa assinatura ICP-Brasil completa.
-- Segurança da senha do certificado: senha é armazenada criptografada (AES-256-CBC) no banco; não é salva em plaintext.
-- Processamento assíncrono: emissão não acontece dentro da request do `POST /sales`.
-- Confiabilidade: fila com `attempts` + `exponential backoff`; lock distribuído via Redis; classificação de erros transientes vs definitivos; idempotência via status check.
-- Prefeitura separada: integração via HTTP para serviço independente (`prefeitura-mock`), com delay simulado de ~2s e resposta randômica.
-- Real-time: SSE + Redis Pub/Sub para atualizar o frontend sem polling.
-- Frontend Atomic Design: componentes reutilizáveis organizados em atoms → molecules → organisms → templates → pages.
+## Decisões de Arquitetura e Trade-offs
 
-## Limitações conhecidas
 
-- Não há assinatura XML padrão ABRASF completa (apenas simulação controlada para o desafio).
-- Não há autenticação de webhook por assinatura/HMAC.
+- **Assinatura digital simplificada:** O worker utiliza o certificado para extrair dados e gerar uma assinatura mock baseada em hash do XML, simulando o fluxo real sem implementar a assinatura ICP-Brasil completa, o que permite foco em arquitetura e resiliência.
+- **Segurança da senha do certificado:** A senha do certificado é armazenada criptografada (AES-256-CBC) no banco, nunca em texto puro.
+- **Processamento assíncrono:** A emissão ocorre fora do ciclo da request do `POST /sales`, garantindo escalabilidade e resiliência.
+- **Confiabilidade:** Fila com tentativas automáticas, backoff exponencial, lock distribuído via Redis, classificação de erros transientes/definitivos e idempotência por status.
+- **Prefeitura desacoplada:** Integração via HTTP com serviço independente (`prefeitura-mock`), simulando delays e falhas reais.
+- **Real-time:** SSE + Redis Pub/Sub para atualização instantânea do frontend sem polling.
+- **Frontend Atomic Design:** Componentização rigorosa para máxima reutilização e manutenibilidade.
 
-## Entrega de demonstração
 
-- Plano A (deploy público): **não incluído**.
-- Plano B (vídeo 2–4 min): **pendente de anexar link**.
+---
 
-Checklist sugerido para o vídeo:
+## Considerações de Segurança
 
-1. `docker compose up -d --build`
-2. Login no frontend
-3. Upload de certificado
-4. Criação de sale
-5. Mudança de status `PROCESSING -> SUCCESS/ERROR` (em tempo real via SSE)
-6. Rodar testes: `cd worker && npm test`
+O InvoiceFlow foi projetado com múltiplos controles de segurança e práticas recomendadas para ambientes de produção:
 
-## Smoke test
+- **Expiração de JWT:** Tokens de autenticação possuem tempo de expiração configurável, reduzindo riscos em caso de vazamento.
+- **Criptografia AES-256-CBC:** Senhas de certificados são armazenadas criptografadas no banco, nunca em texto puro.
+- **Rate Limiting no Nginx:** Limite de 30 requisições/s por IP (burst 10) nas rotas sensíveis, mitigando brute force e abusos.
+- **Security Headers:** Nginx aplica CSP restritiva, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy e outros headers para defesa em profundidade.
+- **Lock Distribuído:** Redis SET NX EX previne processamento concorrente da mesma venda, protegendo contra race conditions.
+- **Idempotência:** O worker garante que vendas já processadas (SUCCESS/ERROR) não sejam reprocessadas, evitando duplicidade.
+- **.env não versionado:** Variáveis sensíveis nunca são versionadas, seguindo boas práticas DevSecOps.
 
-Para validação rápida da API, rode:
+### Recomendações de Hardening para Produção
 
-```powershell
-.\scripts\smoke-test.ps1 -ApiBaseUrl "http://localhost:3000"
-```
+- **Secret Manager (GCP/AWS):** Gerencie segredos e variáveis sensíveis fora do ambiente Docker, usando serviços como Google Secret Manager ou AWS Secrets Manager.
+- **Assinatura HMAC em Webhook:** Implemente assinatura HMAC para autenticação e integridade dos webhooks enviados.
+- **Containers sem root:** Execute todos os containers com usuários não-root, minimizando superfície de ataque.
+- **Object Storage para Certificados:** Armazene certificados em serviços como GCS, S3 ou Azure Blob, evitando persistência local.
+- **Observabilidade e Alertas:** Implemente monitoramento, tracing e alertas para falhas, filas, erros e tentativas de ataque.
+- **Dead-letter Queue:** Configure DLQ para jobs que excederem o número máximo de tentativas, garantindo rastreabilidade e análise de falhas.
 
-Com upload de certificado:
+---
 
-```powershell
-.\scripts\smoke-test.ps1 -ApiBaseUrl "http://localhost:3000" -CertificatePath "certs\test-cert.pfx" -CertificatePassword "123456"
-```
+## Limitações e Escopos Deliberados
 
-O script executa: healthcheck → login → upload do certificado (opcional) → criação de sale → polling até status final.
+- **Assinatura ABRASF:** O projeto simula a assinatura digital padrão ABRASF para fins de demonstração e arquitetura, não sendo adequado para produção fiscal real.
+- **Webhook sem HMAC:** A autenticação de webhooks é opcional e pode ser expandida conforme requisitos de segurança do ambiente alvo.
+
+Essas decisões foram tomadas para priorizar clareza arquitetural, segurança de fluxo e facilidade de demonstração, mantendo o código pronto para extensões e integrações reais.
