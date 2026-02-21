@@ -8,7 +8,7 @@ export interface Certificate {
 
 export async function getCertificates(): Promise<Certificate[]> {
   const res = await api.get('/certificates');
-  return res.data as Certificate[];
+  return Array.isArray(res.data) ? res.data : [];
 }
 
 export async function uploadCertificate(file: File, password: string): Promise<Certificate> {
