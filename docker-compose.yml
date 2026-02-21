@@ -78,8 +78,6 @@ services:
       retries: 5
     networks:
       - invoiceflow
-    command: >
-      sh -c "npx prisma migrate deploy && npx ts-node prisma/seed.ts || node -e \"const{PrismaClient}=require('@prisma/client');const p=new PrismaClient();const bcrypt=require('bcryptjs');bcrypt.hash('admin',10).then(h=>p.user.upsert({where:{email:'admin@demo.com'},update:{},create:{email:'admin@demo.com',password:h}})).then(()=>p.\$disconnect())\" && npm run start"
 
   worker:
     build:
