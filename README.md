@@ -31,7 +31,7 @@ A aplicação está disponível publicamente para avaliação:
 
 - **Frontend:** http://35.185.50.100:8080/
 - **API Health Check:** http://35.185.50.100:3000/health
-- **N8N 
+- **n8n (Painel):** http://35.185.50.100:5678/
 
 > Ambiente hospedado em VM na GCP utilizando Docker Compose.
 > O Nginx atua como reverse proxy e único ponto de entrada público.
