@@ -1,0 +1,127 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-invoiceflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-invoiceflow}
+      POSTGRES_DB: ${POSTGRES_DB:-invoiceflow}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-invoiceflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - invoiceflow
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - invoiceflow
+
+  prefeitura-mock:
+    build:
+      context: ./prefeitura-mock
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      SUCCESS_RATE: ${PREFEITURA_SUCCESS_RATE:-0.8}
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - invoiceflow
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-invoiceflow}:${POSTGRES_PASSWORD:-invoiceflow}@db:5432/${POSTGRES_DB:-invoiceflow}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
+      UPLOADS_DIR: /app/uploads
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - invoiceflow
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-invoiceflow}:${POSTGRES_PASSWORD:-invoiceflow}@db:5432/${POSTGRES_DB:-invoiceflow}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
+      PREFEITURA_URL: http://prefeitura-mock:3001
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      UPLOADS_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      prefeitura-mock:
+        condition: service_healthy
+    networks:
+      - invoiceflow
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - invoiceflow
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads:
+
+networks:
+  invoiceflow:
+    driver: bridge
