@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
 import FeedbackMessage from '../../atoms/FeedbackMessage/FeedbackMessage';
@@ -15,6 +15,7 @@ export default function CertificateUploadForm({ onUpload }: CertificateUploadFor
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,6 +36,7 @@ export default function CertificateUploadForm({ onUpload }: CertificateUploadFor
       await onUpload(file, password);
       setFile(null);
       setPassword('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setSuccess('Certificate uploaded successfully!');
     } catch {
       setError('Upload failed. Check your file and password.');
@@ -51,6 +53,7 @@ export default function CertificateUploadForm({ onUpload }: CertificateUploadFor
         <FormField label="Certificate File (.pfx / .p12)" htmlFor="cert-file">
           <input
             id="cert-file"
+            ref={fileInputRef}
             type="file"
             accept=".pfx,.p12"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
