@@ -1,0 +1,28 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card h2 {
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  color: #2d3748;
+}
+
+.hint {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form button[type='submit'] {
+  align-self: flex-start;
+}

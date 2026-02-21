@@ -1,0 +1,12 @@
+.message {
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.error {
+  color: #e53e3e;
+}
+
+.success {
+  color: #276749;
+}

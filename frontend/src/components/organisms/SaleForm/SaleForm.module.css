@@ -1,0 +1,25 @@
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.section h2 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  color: #2d3748;
+}
+
+.form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.form > input {
+  flex: 1;
+  min-width: 150px;
+}
