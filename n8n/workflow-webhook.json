@@ -1,0 +1,91 @@
+{
+  "name": "InvoiceFlow – Webhook Consumer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoiceflow-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-status",
+              "leftValue": "={{ $json.body.status }}",
+              "rightValue": "SUCCESS",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-status",
+      "name": "Check Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst result = {\n  event: 'invoice_issued',\n  saleId: body.saleId,\n  protocol: body.protocol || '',\n  status: body.status,\n  message: `NFS-e emitida com sucesso. Protocolo: ${body.protocol}`,\n  processedAt: new Date().toISOString()\n};\nconsole.log('[SUCESSO]', JSON.stringify(result));\nreturn [{ json: result }];"
+      },
+      "id": "log-success",
+      "name": "Log Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst result = {\n  event: 'invoice_failed',\n  saleId: body.saleId,\n  status: body.status,\n  error: body.errorMsg || 'Sem detalhes',\n  message: `Erro na emissao da NFS-e para venda ${body.saleId}`,\n  processedAt: new Date().toISOString()\n};\nconsole.log('[ERRO]', JSON.stringify(result));\nreturn [{ json: result }];"
+      },
+      "id": "log-error",
+      "name": "Log Erro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          { "node": "Check Status", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Check Status": {
+      "main": [
+        [{ "node": "Log Sucesso", "type": "main", "index": 0 }],
+        [{ "node": "Log Erro", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "invoiceflow-local"
+  },
+  "tags": [
+    { "name": "invoiceflow" },
+    { "name": "webhook" }
+  ]
+}
