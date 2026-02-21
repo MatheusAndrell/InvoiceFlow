@@ -1,0 +1,21 @@
+# Variáveis de ambiente (nunca comitar com dados reais)
+.env
+
+# Certificados digitais
+certs/
+
+# Dependências
+node_modules/
+vendor/
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
