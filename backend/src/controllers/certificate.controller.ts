@@ -17,7 +17,7 @@ export async function uploadCertificate(req: AuthRequest, res: Response): Promis
   }
 
   try {
-    const certificate = await certificateService.upload(req.userId!, req.file.path, req.file.filename, password);
+    const certificate = await certificateService.upload(req.userId!, req.file.filename, password);
     res.status(201).json(certificate);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Upload failed';

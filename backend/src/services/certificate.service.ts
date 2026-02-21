@@ -29,7 +29,7 @@ export function decryptPassword(encryptedPassword: string): string {
 }
 
 export class CertificateService {
-  async upload(userId: string, filePath: string, filename: string, password: string) {
+  async upload(userId: string, filename: string, password: string) {
     const encryptedPassword = encryptPassword(password);
 
     const certificate = await prisma.certificate.create({
