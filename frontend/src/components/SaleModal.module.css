@@ -1,0 +1,141 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header h3 {
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #a0aec0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover {
+  color: #4a5568;
+}
+
+.body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.label {
+  min-width: 100px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #718096;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 0.9rem;
+  color: #2d3748;
+  word-break: break-all;
+}
+
+.statusSUCCESS {
+  color: #276749;
+  font-weight: 600;
+}
+
+.statusERROR {
+  color: #c53030;
+  font-weight: 600;
+}
+
+.statusPROCESSING {
+  color: #2b6cb0;
+  font-weight: 600;
+}
+
+.protocolBox {
+  background: #f0fff4;
+  border: 1px solid #c6f6d5;
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.protocol {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #276749;
+  word-break: break-all;
+}
+
+.errorBox {
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.errorMsg {
+  font-size: 0.9rem;
+  color: #c53030;
+}
+
+.footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeButton {
+  padding: 0.5rem 1.25rem;
+  background: #edf2f7;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: #e2e8f0;
+}
