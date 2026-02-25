@@ -380,20 +380,6 @@ O InvoiceFlow foi projetado com múltiplos controles de segurança e práticas r
 - **Idempotência:** O worker garante que vendas já processadas (SUCCESS/ERROR) não sejam reprocessadas, evitando duplicidade.
 - **.env não versionado:** Variáveis sensíveis nunca são versionadas, seguindo boas práticas DevSecOps.
 
-### Recomendações de Hardening para Produção
-
-- **Secret Manager (GCP/AWS):** Gerencie segredos e variáveis sensíveis fora do ambiente Docker, usando serviços como Google Secret Manager ou AWS Secrets Manager.
-- **Assinatura HMAC em Webhook:** Implemente assinatura HMAC para autenticação e integridade dos webhooks enviados.
-- **Containers sem root:** Execute todos os containers com usuários não-root, minimizando superfície de ataque.
-- **Object Storage para Certificados:** Armazene certificados em serviços como GCS, S3 ou Azure Blob, evitando persistência local.
-- **Observabilidade e Alertas:** Implemente monitoramento, tracing e alertas para falhas, filas, erros e tentativas de ataque.
-- **Dead-letter Queue:** Configure DLQ para jobs que excederem o número máximo de tentativas, garantindo rastreabilidade e análise de falhas.
-
 ---
-
-## Limitações e Escopos Deliberados
-
-- **Assinatura ABRASF:** O projeto simula a assinatura digital padrão ABRASF para fins de demonstração e arquitetura, não sendo adequado para produção fiscal real.
-- **Webhook sem HMAC:** A autenticação de webhooks é opcional e pode ser expandida conforme requisitos de segurança do ambiente alvo.
 
 Essas decisões foram tomadas para priorizar clareza arquitetural, segurança de fluxo e facilidade de demonstração, mantendo o código pronto para extensões e integrações reais.
